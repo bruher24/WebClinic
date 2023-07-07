@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <link rel="icon" href="#">
     <meta charset="utf-8">
     <title>Главная</title>
+    <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
     <header>
@@ -16,6 +18,39 @@
             <li><a href="#">Личный кабинет</a></li>
         </ul>
     </nav>
-    <main>Основное содержание</main>
+    <main>
+        <h2>Форма регистрации</h2>
+        <form class="regForm" method="post" action="../server/index.php">
+            <label class="inputLabel">
+                Фамилия:
+                <input class="inputClass" type="text" name="surname" placeholder="Введите вашу фамилию">
+            </label>
+            <label class="inputLabel">
+                Имя:
+                <input class="inputClass" type="text" name="name" placeholder="Введите ваше имя">
+            </label>
+            <label class="inputLabel">
+                Отчество:
+                <input class="inputClass" type="text" name="lastname" placeholder="Введите ваше отчество">
+            </label>
+            <label class="inputLabel">
+                E-mail:
+                <input class="inputClass" type="email" name="email" placeholder="Введите адрес эл. почты">
+            </label>
+            <label class="inputLabel">
+                Пароль:
+                <input class="inputClass" type="password" name="password" placeholder="Придумайте пароль">
+            </label>
+            <label class="inputLabel">
+                Роль:
+                <select class="inputClass" name="role">
+                    <option selected disabled>Выберите из списка</option>
+                    <option value="doctor">Врач</option>
+                    <option value="patient">Пациент</option>
+                </select>
+            </label>
+            <input id="regButton" class="inputClass" type="submit" value="Зарегистрироваться">
+        </form>
+    </main>
 </body>
 </html>
