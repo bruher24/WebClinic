@@ -13,6 +13,7 @@ services:
     volumes:
       - './src/:/var/www/html/'
       - './docker/nginx/conf.d:/etc/nginx/conf.d'
+      - './src/public:/usr/share/nginx/html'
 
   mysql:
     image: mysql:8
