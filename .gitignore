@@ -1,3 +1,5 @@
 docker/volume/mysql/
 *.log
 /.idea/vcs.xml
+composer.phar
+/vendor/

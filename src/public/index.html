@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
+    <script type="text/javascript" src="js/formHandler.js"></script>
     <header>
         <h1>WebClinic</h1>
     </header>
@@ -20,7 +21,7 @@
     </nav>
     <main>
         <h2>Форма регистрации</h2>
-        <form class="regForm" method="post" action="../server/index.php">
+        <form id="signIn" class="regForm"><!--method="post" action="../api/index.php"-->
             <label class="inputLabel">
                 Фамилия:
                 <input class="inputClass" type="text" name="surname" placeholder="Введите вашу фамилию">
@@ -31,7 +32,7 @@
             </label>
             <label class="inputLabel">
                 Отчество:
-                <input class="inputClass" type="text" name="lastname" placeholder="Введите ваше отчество">
+                <input class="inputClass" type="text" name="firstname" placeholder="Введите ваше отчество">
             </label>
             <label class="inputLabel">
                 E-mail:
@@ -41,9 +42,13 @@
                 Пароль:
                 <input class="inputClass" type="password" name="password" placeholder="Придумайте пароль">
             </label>
+            <label id="specLabel" class="inputLabel" style="display: none">
+                Специальность:
+                <input class="inputClass" type="text" name="speciality" placeholder="Укажите специальность">
+            </label>
             <label class="inputLabel">
                 Роль:
-                <select class="inputClass" name="role">
+                <select id="roleSelect" class="inputClass" name="role">
                     <option selected disabled>Выберите из списка</option>
                     <option value="doctor">Врач</option>
                     <option value="patient">Пациент</option>
