@@ -3,7 +3,7 @@ class Server {
         const query = Object.keys(params).map(key =>
             `${key}=${params[key]}`
         ).join("&");
-        const response = await fetch(`localhost/api/?${query}`);
+        const response = await fetch(`/api/index.php/?${query}`);
         const answer = await response.json();
         return answer?.result === 'ok' ? answer?.data : null;
     }
@@ -12,7 +12,7 @@ class Server {
         const query = Object.keys(data).map(key =>
             `${key}=${data[key]}`
         ).join("&");
-        const response = await fetch(`localhost/api/?${query}`, {
+        const response = await fetch(`/api/index.php/?${query}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
