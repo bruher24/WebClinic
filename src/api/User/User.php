@@ -1,7 +1,5 @@
 <?php
 
-
-
 class User
 {
     private string $surname, $name, $lastname, $email, $password, $role;

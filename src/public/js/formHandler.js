@@ -12,7 +12,7 @@ class Server {
         const query = Object.keys(data).map(key =>
             `${key}=${data[key]}`
         ).join("&");
-        const response = await fetch(`/api/index.php/?${query}`, {
+        const response = await fetch(`http://localhost/?${query}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -24,7 +24,7 @@ class Server {
     }
 
     async signIn(data) {
-        data['method'] = 'signIn';
+        data['method'] = 'signUp';
         return await this.postSend(data);
     }
 }

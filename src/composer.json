@@ -14,5 +14,7 @@
             "api/DB/DB.php"
         ]
     },
-    "require": {}
+    "require": {
+      "ext-json": "*"
+    }
 }
