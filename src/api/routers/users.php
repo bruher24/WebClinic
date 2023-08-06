@@ -9,12 +9,8 @@ function route($method, $params, $formData)
             case 'signIn':
                 return json_encode($app->signIn($params));
             default:
-                echo json_encode(array(
+                return json_encode(array(
                     'error' => 'Doesnt work'
                 ));
         }
-
-    echo json_encode(array(
-        'error' => 'My Bad Request'
-    ));
 }
