@@ -1,22 +1,19 @@
 <?php
 
-function route($method, $urlData, $formData)
+function route($method, $params, $formData)
 {
     $app = new Application();
-    if ($method === 'POST') {
-        switch ($urlData[0]) {
+        switch ($params['method']) {
             case 'signUp':
-                return json_encode($app->signUp($formData));
+                return $app->signUp($params);
             case 'signIn':
-                return json_encode($app->signIn($formData));
+                return json_encode($app->signIn($params));
             default:
-                header('HTTP/1.0 400 Bad Request');
                 echo json_encode(array(
                     'error' => 'Doesnt work'
                 ));
         }
-    }
-    header('HTTP/1.0 400 Bad Request');
+
     echo json_encode(array(
         'error' => 'My Bad Request'
     ));

@@ -13,13 +13,9 @@ class Application
 
     public function signUp(array $data): array
     {
-        switch($data['role']) {
-            case 'doctor':
-                return $this->user->addDoctor($data);
-            case 'patient':
-                return $this->user->addPatient($data);
-            default:
-                return array('Msg' => 'Invalid data[role].'); //TODO: add exception & exception handler
+        if ($data['role']) {
+            return $this->user->addUser($data);
         }
+        return array('Msg' => 'Invalid data[role].'); //TODO: add exception & exception handler
     }
 }

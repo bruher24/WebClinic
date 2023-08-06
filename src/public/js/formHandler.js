@@ -47,7 +47,7 @@ window.onload = e => {
         e.preventDefault();
         const data = new FormData(form);
         const server = new Server();
-        const params = new Map;
+        let params = new Map;
         for(let pair of data.entries()) {
             params.set(pair[0], pair[1]);
         }

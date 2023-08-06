@@ -20,23 +20,14 @@ class User
         return $this->$name;
     }
 
-    public function addDoctor(array $data): array
+    public function addUser(array $data): array
     {
         foreach ($data as $item) {
             if (is_null($item)) {
                 return array('Msg' => 'Invalid data.'); //TODO: add exception & exception handler
             }
         }
-        return $this->db->addDoctor($data);
+        return $this->db->addUser($data);
     }
 
-    public function addPatient(array $data): array
-    {
-        foreach ($data as $item) {
-            if (is_null($item) && $item !== 'speciality') {
-                return array('Msg' => 'Invalid data.'); //TODO: add exception & exception handler
-            }
-        }
-        return $this->db->addPatient($data);
-    }
 }
