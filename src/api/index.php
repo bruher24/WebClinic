@@ -41,7 +41,7 @@ header("Access-Control-Allow-Headers: X-PINGOTHER, Content-Type, Access-Control-
 //echo(json_encode(answer(router($_POST))));
 
 require_once __DIR__ . '/../vendor/autoload.php';
-
+session_start();
 $method = $_SERVER['REQUEST_METHOD'];
 
 function getFormData($method): array
@@ -80,7 +80,6 @@ $params = ['method' => $urlData[array_key_first($urlData)]];
 foreach ($qArr as $item) {
     $params[explode('=', $item)[0]] = explode('=', $item)[1];
 }
-
 
 include_once 'routers/' . $router . '.php';
 return route($method, $params, $formData);

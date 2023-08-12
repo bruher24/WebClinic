@@ -3,14 +3,16 @@
 function route($method, $params, $formData)
 {
     $app = new Application();
-        switch ($params['method']) {
-            case 'signUp':
-                return $app->signUp($params);
-            case 'signIn':
-                return json_encode($app->signIn($params));
-            default:
-                return json_encode(array(
-                    'error' => 'Doesnt work'
-                ));
-        }
+    switch ($params['method']) {
+        case 'register':
+            return $app->register($params);
+        case 'login':
+            return $app->login($params);
+        case 'logout':
+            return $app->logout($params);
+        default:
+            return array(
+                'error' => 'Doesnt work'
+            );
+    }
 }

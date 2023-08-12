@@ -20,14 +20,19 @@ class User
         return $this->$name;
     }
 
-    public function addUser(array $data): array
+    public function addUser(array $data): string
     {
         foreach ($data as $item) {
             if (is_null($item)) {
-                return array('Msg' => 'Invalid data.'); //TODO: add exception & exception handler
+                return 'Invalid data'; //TODO: add exception & exception handler
             }
         }
         return $this->db->addUser($data);
+    }
+
+    public function login(array $data): array
+    {
+        return $this->db->login($data);
     }
 
 }

@@ -12,19 +12,37 @@ class DB
         }
     }
 
-    public function addUser($data):array
+    public function addUser($data)
     {
         $data['speciality'] = $data['role'] === 'patient' ? 'patient' : null;
-        if ($data['role'] === 'doctor') {
-            $stmt = $this->mysqli->prepare("INSERT INTO doctors (surname, name, firstname, email, passwordHash, speciality) VALUES (?, ?, ?, ?, ?, ?)");
-        }else {
-            $stmt = $this->mysqli->prepare("INSERT INTO patients (surname, name, firstname, email, passwordHash, speciality) VALUES (?, ?, ?, ?, ?, ?)");
-        }
-        $stmt->bind_param("ssssss",$data['surname'], $data['name'], $data['firstname'], $data['email'], $data['passwordHash'], $data['speciality']);
+        $hash = password_hash($data['passwordHash'], PASSWORD_BCRYPT);
+        $stmt = $this->mysqli->prepare("INSERT INTO users (surname, name, firstname, email, passwordHash, role, speciality) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssssss", $data['surname'], $data['name'], $data['firstname'], $data['email'], $hash, $data['role'], $data['speciality']);
 
-        if (!$stmt->execute()){
-            return array("err". " " . $stmt->errno . " " . $stmt->error);
+        if (!$stmt->execute()) {
+            return array("err" . " " . $stmt->errno . " " . $stmt->error);
         }
-        return array("1" => "Added successfully");
+        $stmt->close();
+        return "Added successfully";
+    }
+
+    public function login($data): array
+    {
+        $stmt = $this->mysqli->prepare("SELECT passwordHash FROM users WHERE email = ?");
+        $stmt->bind_param("s", $data['email']);
+
+        if (!$stmt->execute()) {
+            var_dump('execute err');
+            return array('not found in db'); //TODO: throw exception
+        }
+
+        $stmt->bind_result($hash);
+        $stmt->fetch();
+        $stmt->close();
+        if(password_verify($data['passwordHash'], $hash)) {
+            $_SESSION['email'] = $data['email'];
+            return $_SESSION;
+        }
+        return array();
     }
 }
