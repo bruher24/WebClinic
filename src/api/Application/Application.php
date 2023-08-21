@@ -18,12 +18,21 @@ class Application
         }
         return 'Invalid data[role]'; //TODO: add exception & exception handler
     }
+
     public function login(array $data): array
     {
-        if($data['email'] && $data['passwordHash']) {
+        if ($data['email'] && $data['passwordHash']) {
             return $this->user->login($data);
         }
         var_dump('invalid email of pass');
         return array('Invalid data'); //TODO: add exception & exception handler
+    }
+
+    public function logout(): array
+    {
+        if ($_SESSION['email']) {
+            return $this->user->logout();
+        }
+        return array('err');
     }
 }

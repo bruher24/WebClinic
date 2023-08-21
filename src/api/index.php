@@ -73,13 +73,20 @@ $router = $urls[0];
 
 $urlData = array_slice($urls, 1);
 $urlData[array_key_last($urlData)] = ltrim($urlData[array_key_last($urlData)], '?');
-$urlData[array_key_last($urlData)] = explode('&', $urlData[array_key_last($urlData)]);
+if (strstr($urlData[array_key_last($urlData)], '&')) {
+    $urlData[array_key_last($urlData)] = explode('&', $urlData[array_key_last($urlData)]);
+}
 
 $qArr = $urlData[array_key_last($urlData)];
+
 $params = ['method' => $urlData[array_key_first($urlData)]];
-foreach ($qArr as $item) {
-    $params[explode('=', $item)[0]] = explode('=', $item)[1];
+var_dump($qArr);
+if (is_array($qArr)) {
+    foreach ($qArr as $item) {
+        $params[explode('=', $item)[0]] = explode('=', $item)[1];
+    }
 }
 
 include_once 'routers/' . $router . '.php';
+
 return route($method, $params, $formData);

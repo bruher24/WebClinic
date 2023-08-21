@@ -9,7 +9,7 @@ function route($method, $params, $formData)
         case 'login':
             return $app->login($params);
         case 'logout':
-            return $app->logout($params);
+            return $app->logout();
         default:
             return array(
                 'error' => 'Doesnt work'

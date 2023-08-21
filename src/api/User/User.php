@@ -35,4 +35,9 @@ class User
         return $this->db->login($data);
     }
 
+    public function logout(): array
+    {
+        return $this->db->logout();
+    }
+
 }
