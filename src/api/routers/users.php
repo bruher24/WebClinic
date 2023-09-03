@@ -1,6 +1,6 @@
 <?php
 
-function route($method, $params, $formData)
+function route($method, $params, $formData): array
 {
     $app = new Application();
     switch ($params['method']) {
@@ -10,6 +10,8 @@ function route($method, $params, $formData)
             return $app->login($params);
         case 'logout':
             return $app->logout();
+        case 'getUserData':
+            return $app->getUserData();
         default:
             return array(
                 'error' => 'Doesnt work'

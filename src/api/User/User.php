@@ -20,11 +20,11 @@ class User
         return $this->$name;
     }
 
-    public function addUser(array $data): string
+    public function addUser(array $data): array
     {
         foreach ($data as $item) {
             if (is_null($item)) {
-                return 'Invalid data'; //TODO: add exception & exception handler
+                return array('Invalid data'); //TODO: add exception & exception handler
             }
         }
         return $this->db->addUser($data);
@@ -38,6 +38,11 @@ class User
     public function logout(): array
     {
         return $this->db->logout();
+    }
+
+    public function getUserData(): array
+    {
+        return $this->db->getUserData();
     }
 
 }

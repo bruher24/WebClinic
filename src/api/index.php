@@ -3,47 +3,13 @@
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: OPTIONS,GET,POST,PUT,DELETE");
 header("Access-Control-Allow-Headers: X-PINGOTHER, Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
-//
-//
-//$app = new Application();
-//
-//function router($data)
-//{
-//    global $app;
-//    if (isset($data['method'])) {
-//        switch ($data['method']) {
-//            case 'singUp':
-//                return $app->signUp($data);
-//            case 'singIn':
-//                return $app->signIn();
-//            case 'logout':
-//                return $app->logout();
-//            default:
-//                return 'Invalid method.'; //TODO: throw exception & add exception handler
-//        }
-//    }else {
-//        return 'Data is invalid.'; //TODO: throw exception & add exception handler
-//    }
-//}
-//
-//function answer($data): array {
-//    if ($data) {
-//        return array(
-//            'result' => 'ok',
-//            'data' => $data
-//        );
-//    }
-//    return array(
-//        'result' => 'error'
-//    );
-//}
-//
-//echo(json_encode(answer(router($_POST))));
+
 
 require_once __DIR__ . '/../vendor/autoload.php';
-session_start();
+
 $method = $_SERVER['REQUEST_METHOD'];
 
+session_start();
 function getFormData($method): array
 {
     //GET, POST
@@ -80,7 +46,7 @@ if (strstr($urlData[array_key_last($urlData)], '&')) {
 $qArr = $urlData[array_key_last($urlData)];
 
 $params = ['method' => $urlData[array_key_first($urlData)]];
-var_dump($qArr);
+
 if (is_array($qArr)) {
     foreach ($qArr as $item) {
         $params[explode('=', $item)[0]] = explode('=', $item)[1];
@@ -89,4 +55,4 @@ if (is_array($qArr)) {
 
 include_once 'routers/' . $router . '.php';
 
-return route($method, $params, $formData);
+echo json_encode(route($method, $params, $formData));

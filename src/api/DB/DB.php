@@ -3,6 +3,7 @@
 class DB
 {
     private mysqli $mysqli;
+    private User $user;
 
     public function __construct()
     {
@@ -12,7 +13,17 @@ class DB
         }
     }
 
-    public function request(string $queryString, string $paramsAmount, array $inputs, string $failureCallback, array $results, string $successCallback): string
+    public function __set($name, $value)
+    {
+        $this->$name = $value;
+    }
+
+    public function __get($name)
+    {
+        return $this->$name;
+    }
+
+    protected function request(string $queryString, string $paramsAmount, array $inputs, array $results = [], string $successCallback = "success", string $failureCallback = "error"): array
     {
         $stmt = $this->mysqli->prepare($queryString);
         $stmt->bind_param($paramsAmount, ...$inputs);
@@ -28,18 +39,14 @@ class DB
         return $successCallback;
     }
 
-    public function addUser($data): string
+    public function addUser($data): array
     {
-        $data['speciality'] = $data['role'] === 'patient' ? 'patient' : null;
-        $hash = password_hash($data['passwordHash'], PASSWORD_BCRYPT);
-        $stmt = $this->mysqli->prepare("INSERT INTO users (surname, name, firstname, email, passwordHash, role, speciality) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssssss", $data['surname'], $data['name'], $data['firstname'], $data['email'], $hash, $data['role'], $data['speciality']);
-
-        if (!$stmt->execute()) {
-            return "err" . " " . $stmt->errno . " " . $stmt->error;
+        if ($data['role'] === 'patient') {
+            $data['speciality'] = 'patient';
         }
-        $stmt->close();
-        return "Added successfully";
+        $hash = password_hash($data['passwordHash'], PASSWORD_BCRYPT);
+        $inputs = [$data['surname'], $data['name'], $data['firstname'], $data['email'], $hash, $data['role'], $data['speciality']];
+        return $this->request("INSERT INTO users (surname, name, firstname, email, passwordHash, role, speciality) VALUES (?, ?, ?, ?, ?, ?, ?)", "sssssss", $inputs);
     }
 
     public function login($data): array
@@ -48,24 +55,23 @@ class DB
         $stmt->bind_param("s", $data['email']);
 
         if (!$stmt->execute()) {
-            var_dump('execute err');
             return array('not found in db'); //TODO: throw exception
         }
 
         $stmt->bind_result($hash);
         $stmt->fetch();
         $stmt->close();
+
         if (password_verify($data['passwordHash'], $hash)) {
             $_SESSION['email'] = $data['email'];
-            $stmt = $this->mysqli->prepare("UPDATE users SET phpsessid = ? WHERE email = ?");
-            //TODO: разобраться с сессиями
             $_SESSION['sessId'] = session_id();
+            $stmt = $this->mysqli->prepare("UPDATE users SET phpsessid = ? WHERE email = ?"); //TODO: разобраться с сессиями
             $stmt->bind_param("ss", $_SESSION['sessId'], $_SESSION['email']);
             if (!$stmt->execute()) {
-                var_dump('add id err');
                 return array('add id err');
             }
             $stmt->close();
+            $_SESSION['loggedIn'] = true;
             return $_SESSION;
         }
         return array('error');
@@ -76,12 +82,23 @@ class DB
         $stmt = $this->mysqli->prepare("UPDATE users SET phpsessid = NULL WHERE email = ?");
         $stmt->bind_param("s", $_SESSION['email']);
         if (!$stmt->execute()) {
-            var_dump('logout err');
             return array('logout err');
         }
         $stmt->close();
-        var_dump('succ logout');
-        $_SESSION['email'] = null;
+        $_SESSION = array();
         return array('successfully logged out');
+    }
+
+    public function getUserData(): array
+    {
+        $stmt = $this->mysqli->prepare("SELECT surname, name, firstname, role, speciality FROM users WHERE email = ?");
+        $stmt->bind_param("s", $_SESSION['email']);
+        if (!$stmt->execute()) {
+            return array('getUserData error');
+        }
+        $stmt->bind_result($userData['surname'], $userData['name'], $userData['firstname'], $userData['role'], $userData['speciality']);
+        $stmt->fetch();
+        $stmt->close();
+        return $userData;
     }
 }
