@@ -51,6 +51,8 @@ if (is_array($qArr)) {
     foreach ($qArr as $item) {
         $params[explode('=', $item)[0]] = explode('=', $item)[1];
     }
+}else {
+    $params[explode('=', $qArr)[0]] = explode('=', $qArr)[1];
 }
 
 include_once 'routers/' . $router . '.php';

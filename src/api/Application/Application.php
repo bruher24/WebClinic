@@ -47,4 +47,9 @@ class Application
     {
         return  $this->schedule->addVisit($data);
     }
+
+    public function unsetVisit($data): array
+    {
+        return $this->schedule->unsetVisit($data);
+    }
 }

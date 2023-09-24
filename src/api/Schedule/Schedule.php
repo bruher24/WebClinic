@@ -11,8 +11,12 @@ class Schedule
 
     public function addVisit($data): array
     {
-
         return $this->db->addVisit($data['docId'], $_SESSION['userId'], $data['dateTime']);
+    }
+
+    public function unsetVisit($data): array
+    {
+        return $this->db->unsetVisit($data['dateTime']);
     }
 
 }

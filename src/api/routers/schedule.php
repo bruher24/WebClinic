@@ -9,7 +9,7 @@ function route($method, $params, $formData): array
         case 'addVisit':
             return $app->addVisit($params);
         case 'unsetVisit':
-            return $app->unsetVisit();
+            return $app->unsetVisit($params);
         case 'getUserTable':
             return $app->getUserTable();
         default:
