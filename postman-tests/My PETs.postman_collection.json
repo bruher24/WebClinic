@@ -1,0 +1,268 @@
+{
+	"info": {
+		"_postman_id": "57c2f305-c2ae-4983-92e1-7e4a07cefea6",
+		"name": "My PETs",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19265685"
+	},
+	"item": [
+		{
+			"name": "WebClinic",
+			"item": [
+				{
+					"name": "register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/users/register/?surname=Тестов&name=Тест&firstname=Тестович&email=test@test.com&passwordHash=test123&role=patient",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"register",
+								""
+							],
+							"query": [
+								{
+									"key": "surname",
+									"value": "Тестов"
+								},
+								{
+									"key": "name",
+									"value": "Тест"
+								},
+								{
+									"key": "firstname",
+									"value": "Тестович"
+								},
+								{
+									"key": "email",
+									"value": "test@test.com"
+								},
+								{
+									"key": "passwordHash",
+									"value": "test123"
+								},
+								{
+									"key": "role",
+									"value": "patient"
+								},
+								{
+									"key": "speciality",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "price",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/users/login/?email=test@test.com&passwordHash=test123",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"login",
+								""
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "test@test.com"
+								},
+								{
+									"key": "passwordHash",
+									"value": "test123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/users/logout/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"logout",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getUserData",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/users/getUserData/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"getUserData",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addVisit",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/schedule/addVisit/?docId=2&dateTime=2023-09-12 15:00",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"schedule",
+								"addVisit",
+								""
+							],
+							"query": [
+								{
+									"key": "docId",
+									"value": "2"
+								},
+								{
+									"key": "dateTime",
+									"value": "2023-09-12 15:00"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "unsetVisit",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/schedule/unsetVisit/?dateTime=2023-09-12 15:00",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"schedule",
+								"unsetVisit",
+								""
+							],
+							"query": [
+								{
+									"key": "dateTime",
+									"value": "2023-09-12 15:00"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getUserTable",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/schedule/getUserTable/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"schedule",
+								"getUserTable",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getDocsTable",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/schedule/getDocsTable/?docId=2&day=2023-09-12",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"schedule",
+								"getDocsTable",
+								""
+							],
+							"query": [
+								{
+									"key": "docId",
+									"value": "2"
+								},
+								{
+									"key": "day",
+									"value": "2023-09-12"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "exceptionTest",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/schedule/testMethod",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"schedule",
+								"testMethod"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
