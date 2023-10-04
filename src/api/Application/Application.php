@@ -15,10 +15,10 @@ class Application
 
     public function register(array $data): array
     {
-        if ($data['role']) {
-            return $this->user->addUser($data);
+        foreach ($data as $value) {
+            if (is_null($value)) throw new DataException();
         }
-        return array('invalid data\role'); //TODO: add exception & exception handler
+        return $this->user->addUser($data);
     }
 
     public function login(array $data): array
@@ -45,11 +45,21 @@ class Application
 
     public function addVisit($data): array
     {
-        return  $this->schedule->addVisit($data);
+        return $this->schedule->addVisit($data);
     }
 
     public function unsetVisit($data): array
     {
         return $this->schedule->unsetVisit($data);
+    }
+
+    public function getUserTable(): array
+    {
+        return $this->schedule->getUserTable();
+    }
+
+    public function getDocsTable($params): array
+    {
+        return $this->schedule->getDocsTable($params);
     }
 }

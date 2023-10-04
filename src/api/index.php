@@ -3,8 +3,9 @@
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: OPTIONS,GET,POST,PUT,DELETE");
 header("Access-Control-Allow-Headers: X-PINGOTHER, Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+header("Content-Type: text/html; charset=utf-8");
 
-
+require __DIR__ . '/exception_handler.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -49,10 +50,10 @@ $params = ['method' => $urlData[array_key_first($urlData)]];
 
 if (is_array($qArr)) {
     foreach ($qArr as $item) {
-        $params[explode('=', $item)[0]] = explode('=', $item)[1];
+        $params[explode('=', $item)[0]] = urldecode(explode('=', $item)[1]);
     }
-}else {
-    $params[explode('=', $qArr)[0]] = explode('=', $qArr)[1];
+} else {
+    $params[explode('=', $qArr)[0]] = urldecode(explode('=', $qArr)[1]);
 }
 
 include_once 'routers/' . $router . '.php';

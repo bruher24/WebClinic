@@ -13,8 +13,7 @@ function route($method, $params, $formData): array
         case 'getUserTable':
             return $app->getUserTable();
         default:
-            return array(
-                'error' => 'Doesnt work'
-            );
+            throw new RoutersException();
     }
 }
+

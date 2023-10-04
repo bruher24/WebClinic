@@ -11,11 +11,16 @@
         "files": [
             "api/Application/Application.php",
             "api/User/User.php",
-            "api/DB/DB.php"
+            "api/DB/DB.php",
+            "api/Schedule/Schedule.php",
+            "api/Exceptions/RoutersException.php",
+            "api/Exceptions/BaseException.php"
         ]
     },
     "require": {
       "ext-json": "*",
-      "ext-mysqli": "*"
+      "ext-mysqli": "*",
+      "ext-mbstring": "*",
+        "ext-cassandra": "*"
     }
 }
