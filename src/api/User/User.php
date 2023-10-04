@@ -2,7 +2,6 @@
 
 class User
 {
-    private string $surname, $name, $lastname, $email, $password, $role;
     private DB $db;
 
     public function __construct()
@@ -33,17 +32,20 @@ class User
 
     public function login(array $data): array
     {
+        if (!$data['email'] || !$data['passwordHash']) throw new DataException();
         if ($_SESSION['loggedIn']) return array('Уже авторизованы');
         return $this->db->login($data);
     }
 
     public function logout(): array
     {
+        if (!$_SESSION['email']) throw new DataException();
         return $this->db->logout();
     }
 
     public function getUserData(): array
     {
+        if (!$_SESSION['email']) throw new DataException();
         return $this->db->getUserData();
     }
 

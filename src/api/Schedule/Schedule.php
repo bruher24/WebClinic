@@ -11,27 +11,32 @@ class Schedule
 
     public function addVisit($data): array
     {
+        if (!$data['docId'] || !$_SESSION['userId'] || !$data['dateTime']) throw new DataException();
         return $this->db->addVisit($data['docId'], $_SESSION['userId'], $data['dateTime']);
     }
 
     public function unsetVisit($data): array
     {
+        if (!$data['dateTime']) throw new DataException();
         return $this->db->unsetVisit($data['dateTime']);
     }
 
     public function getUserTable(): array
     {
+        if (!$_SESSION['userId']) throw new DataException();
         return $this->db->getUserTable();
     }
 
-    public function getDocsTable($params): array
+    public function getDocsTable($data): array
     {
-        date_default_timezone_set('Europe/Kirov');
-        $datetime = new DateTime($params['day']);
-        if ($datetime->format('N') == 6 || $datetime->format('N') == 7) return array('Выходной. Записи нет.');
-        $table = $this->timeTable($params['day']);
+        if (!$data['day'] || !$data['docId']) throw new DataException();
 
-        return $this->db->getDocsTable($params['docId'], $table);
+        date_default_timezone_set('Europe/Samara');
+        $datetime = new DateTime($data['day']);
+        if ($datetime->format('N') == 6 || $datetime->format('N') == 7) return array('Выходной. Записи нет.');
+        $table = $this->timeTable($data['day']);
+
+        return $this->db->getDocsTable($data['docId'], $table);
     }
 
 

@@ -2,7 +2,6 @@
 
 class Application
 {
-    private DB $db;
     private User $user;
     private Schedule $schedule;
 
@@ -15,27 +14,17 @@ class Application
 
     public function register(array $data): array
     {
-        foreach ($data as $value) {
-            if (is_null($value)) throw new DataException();
-        }
         return $this->user->addUser($data);
     }
 
     public function login(array $data): array
     {
-        if ($data['email'] && $data['passwordHash']) {
-            return $this->user->login($data);
-        }
-        var_dump('invalid email of pass');
-        return array('Invalid data'); //TODO: add exception & exception handler
+        return $this->user->login($data);
     }
 
     public function logout(): array
     {
-        if ($_SESSION['email']) {
-            return $this->user->logout();
-        }
-        return array('No email');
+        return $this->user->logout();
     }
 
     public function getUserData(): array
@@ -58,8 +47,8 @@ class Application
         return $this->schedule->getUserTable();
     }
 
-    public function getDocsTable($params): array
+    public function getDocsTable($data): array
     {
-        return $this->schedule->getDocsTable($params);
+        return $this->schedule->getDocsTable($data);
     }
 }
