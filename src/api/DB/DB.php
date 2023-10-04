@@ -1,7 +1,7 @@
 <?php
 
 use Cassandra\Date;
-
+require_once 'connect.php';
 class DB
 {
     private mysqli $mysqli;
