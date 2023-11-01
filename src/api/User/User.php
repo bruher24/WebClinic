@@ -24,10 +24,17 @@ class User
         foreach ($data as $item) {
             if (is_null($item)) throw new DataException();
         }
-        $data['speciality'] = $data['role'] === 'patient' ? 'patient' : $data['speciality'];
-        $data['price'] = $data['price'] ?? 0;
+
         $data['hash'] = password_hash($data['passwordHash'], PASSWORD_BCRYPT);
-        return $this->db->addUser($data);
+
+        $table = 'users';
+        $params = [$data['surname'], $data['name'], $data['firstname'], $data['email'], $data['hash']];
+
+        if ($data['role'] === 'doctor') {
+            $table = 'doctors';
+            $params[] = $data['speciality'];
+        }
+        return $this->db->addUser($data, $table, $params);
     }
 
     public function login(array $data): array
@@ -49,4 +56,9 @@ class User
         return $this->db->getUserData();
     }
 
+    public function addDocData($data): array
+    {
+        if ($_SESSION['loggedIn'] && $data['speciality'] && $data['price']) return $this->db->addDocData($data);
+        throw new DataException();
+    }
 }

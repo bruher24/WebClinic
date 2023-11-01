@@ -12,6 +12,8 @@ function route($method, $params, $formData): array
             return $app->logout();
         case 'getUserData':
             return $app->getUserData();
+        case 'addDocData':
+            return $app->addDocData($params);
         default:
             throw new RoutersException();
     }

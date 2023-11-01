@@ -30,7 +30,6 @@ class Schedule
     public function getDocsTable($data): array
     {
         if (!$data['day'] || !$data['docId']) throw new DataException();
-
         date_default_timezone_set('Europe/Samara');
         $datetime = new DateTime($data['day']);
         if ($datetime->format('N') == 6 || $datetime->format('N') == 7) return array('Выходной. Записи нет.');

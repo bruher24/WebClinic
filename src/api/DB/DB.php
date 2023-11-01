@@ -1,6 +1,7 @@
 <?php
 
-use Cassandra\Date;
+//TODO: изменить все методы под новый концепт
+
 require_once 'connect.php';
 class DB
 {
@@ -27,16 +28,17 @@ class DB
         return $this->$name;
     }
 
-
-    public function addUser(array $data): array
+    public function addUser(array $data, $table, $params): array
     {
-        $params = [$data['surname'], $data['name'], $data['firstname'], $data['email'], $data['hash'], $data['role'], $data['speciality'], $data['price']];
-        $userCheck = $this->request("SELECT `user_id` FROM `users` WHERE `email` = ?", "s", $data['email']);
+        $userCheck = $this->request("SELECT `email` FROM `{$table}` WHERE `email` = ?", "s", $data['email']);
         if ($userCheck) return array('Данный email уже зарегистрирован');
-        $result = $this->request("INSERT INTO `users` (`surname`, `name`, `firstname`, `email`, `passwordHash`, `role`, `speciality`, `price`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            "ssssssss", $params);
+        if($data['role'] === 'doc')
+            $result = $this->request("INSERT INTO `{$table}` (`surname`, `name`, `firstname`, `email`, `passwordHash`, `speciality`) VALUES (?, ?, ?, ?, ?, ?)", "ssssss", $params);
+        else
+            $result = $this->request("INSERT INTO `{$table}` (`surname`, `name`, `firstname`, `email`, `passwordHash`) VALUES (?, ?, ?, ?, ?)", "sssss", $params);
+
         if ($result[0] == 'ok') return array('Успешная регистрация');
-        return array('error');
+        throw new BaseException();
     }
 
     public function login(array $data): array
@@ -55,6 +57,11 @@ class DB
         return array('Неверный пароль');
     }
 
+    public function addDocData(array $data): array //TODO: сделать
+    {
+
+    }
+
     public function logout(): array
     {
         $this->request("UPDATE `users` SET `phpsessid` = NULL WHERE `email` = ?", "s", $_SESSION['email']);
@@ -65,9 +72,12 @@ class DB
 
     public function getUserData(int $id = null, string $email = null): array
     {
-        if ($id !== null) $userData = $this->request("SELECT `user_id`, `surname`, `name`, `firstname`, `role`, `speciality`, `price` FROM `users` WHERE `user_id` = ?", "i", $id);
-        elseif ($email !== null) $userData = $this->request("SELECT `user_id`, `surname`, `name`, `firstname`, `role`, `speciality`, `price` FROM `users` WHERE `email` = ?", "s", $email);
-        else $userData = $this->request("SELECT `user_id`, `surname`, `name`, `firstname`, `role`, `speciality`, `price` FROM `users` WHERE `email` = ?", "s", $_SESSION['email']);
+        if ($id !== null) $userData =
+            $this->request("SELECT `user_id`, `surname`, `name`, `firstname`, `role`, `speciality`, `price` FROM `users` WHERE `user_id` = ?", "i", $id);
+        elseif ($email !== null) $userData =
+            $this->request("SELECT `user_id`, `surname`, `name`, `firstname`, `role`, `speciality`, `price` FROM `users` WHERE `email` = ?", "s", $email);
+        else $userData =
+            $this->request("SELECT `user_id`, `surname`, `name`, `firstname`, `role`, `speciality`, `price` FROM `users` WHERE `email` = ?", "s", $_SESSION['email']);
         return $userData;
     }
 

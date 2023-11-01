@@ -51,4 +51,9 @@ class Application
     {
         return $this->schedule->getDocsTable($data);
     }
+
+    public function addDocData($data): array
+    {
+        return $this->user->addDocData($data);
+    }
 }
