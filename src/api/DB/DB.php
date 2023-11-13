@@ -3,6 +3,7 @@
 //TODO: изменить все методы под новый концепт
 
 require_once 'connect.php';
+
 class DB
 {
     private mysqli $mysqli;
@@ -32,7 +33,7 @@ class DB
     {
         $userCheck = $this->request("SELECT `email` FROM `{$table}` WHERE `email` = ?", "s", $data['email']);
         if ($userCheck) return array('Данный email уже зарегистрирован');
-        if($data['role'] === 'doc')
+        if ($data['role'] === 'doc')
             $result = $this->request("INSERT INTO `{$table}` (`surname`, `name`, `firstname`, `email`, `passwordHash`, `speciality`) VALUES (?, ?, ?, ?, ?, ?)", "ssssss", $params);
         else
             $result = $this->request("INSERT INTO `{$table}` (`surname`, `name`, `firstname`, `email`, `passwordHash`) VALUES (?, ?, ?, ?, ?)", "sssss", $params);
@@ -43,18 +44,37 @@ class DB
 
     public function login(array $data): array
     {
-        $hash = $this->request("SELECT `passwordHash` FROM `users` WHERE `email` = ?", "s", $data['email'])[0]['passwordHash'];
+        $table = $this->userExistCheck($data);
+        if($table == null) {
+            return array('Пользователь не существует');
+        }
+
+        $hash = $this->request("SELECT `passwordHash` FROM `{$table}` WHERE `email` = ?", "s", $data['email'])[0]['passwordHash'];
+
         if (password_verify($data['passwordHash'], $hash)) {
             $_SESSION['email'] = $data['email'];
             $_SESSION['sessId'] = session_id();
             $params = [$_SESSION['sessId'], $_SESSION['email']];
-            $this->request("UPDATE `users` SET `phpsessid` = ? WHERE `email` = ?", "ss", $params);
+            $this->request("UPDATE `{$table}` SET `phpsessid` = ? WHERE `email` = ?", "ss", $params);
             $userData = $this->getUserData()[0];
             $_SESSION['loggedIn'] = true;
             $_SESSION['userId'] = $userData['user_id'];
             return array('Успешный вход');
         }
         return array('Неверный пароль');
+    }
+
+    public function userExistCheck(array $data): ?string
+    {
+        $result = $this->request("SELECT `email` FROM `doctors` WHERE `email` = ?", "s", $data['email']);
+        if (!$result[0]) {
+            $result = $this->request("SELECT `email` FROM `users` WHERE `email` = ?", "s", $data['email']);
+            if (!$result[0]) {
+                return null;
+            }
+            return 'users';
+        }
+        return 'doctors';
     }
 
     public function addDocData(array $data): array //TODO: сделать
