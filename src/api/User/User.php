@@ -21,18 +21,16 @@ class User
 
     public function addUser(array $data): array
     {
-        foreach ($data as $item) {
-            if (is_null($item)) throw new DataException();
-        }
-
-        $data['hash'] = password_hash($data['passwordHash'], PASSWORD_BCRYPT);
-
-        $table = 'users';
-        $params = [$data['surname'], $data['name'], $data['firstname'], $data['email'], $data['hash']];
-
-        if ($data['role'] === 'doctor') {
-            $table = 'doctors';
-            $params[] = $data['speciality'];
+        try {
+            $data['hash'] = password_hash($data['passwordHash'], PASSWORD_BCRYPT);
+            $table = $data['role'];
+            $params = [$data['surname'], $data['name'], $data['firstname'], $data['email'], $data['hash']];
+            if ($table == 'doctors') $params[] = $data['speciality'];
+            foreach ($params as $key => $value) {
+                if ($value == null) throw new DataException("Все поля должны быть заполнены.");
+            }
+        } catch (DataException $e) {
+            return array('Ошибка! ' . $e->getMessage());
         }
         return $this->db->addUser($data, $table, $params);
     }
@@ -47,13 +45,13 @@ class User
     public function logout(): array
     {
         if (!$_SESSION['email']) throw new DataException();
-        return $this->db->logout();
+        return $this->db->logout($_SESSION['role']);
     }
 
-    public function getUserData(): array
+    public function getUserData(array $data): array
     {
-        if (!$_SESSION['email']) throw new DataException();
-        return $this->db->getUserData();
+        if (!$data['email']) throw new DataException("Missing user's email");
+        return $this->db->getUserData($_SESSION['role'], $data['email']);
     }
 
     public function addDocData($data): array

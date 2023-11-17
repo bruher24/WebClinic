@@ -14,7 +14,8 @@
             "api/DB/DB.php",
             "api/Schedule/Schedule.php",
             "api/Exceptions/RoutersException.php",
-            "api/Exceptions/BaseException.php"
+            "api/Exceptions/BaseException.php",
+            "api/Exceptions/DataException.php"
         ]
     },
     "require": {

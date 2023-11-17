@@ -33,11 +33,10 @@ class DB
     {
         $userCheck = $this->request("SELECT `email` FROM `{$table}` WHERE `email` = ?", "s", $data['email']);
         if ($userCheck) return array('Данный email уже зарегистрирован');
-        if ($data['role'] === 'doc')
+        if ($table == 'doctors')
             $result = $this->request("INSERT INTO `{$table}` (`surname`, `name`, `firstname`, `email`, `passwordHash`, `speciality`) VALUES (?, ?, ?, ?, ?, ?)", "ssssss", $params);
         else
             $result = $this->request("INSERT INTO `{$table}` (`surname`, `name`, `firstname`, `email`, `passwordHash`) VALUES (?, ?, ?, ?, ?)", "sssss", $params);
-
         if ($result[0] == 'ok') return array('Успешная регистрация');
         throw new BaseException();
     }
@@ -45,7 +44,7 @@ class DB
     public function login(array $data): array
     {
         $table = $this->userExistCheck($data);
-        if($table == null) {
+        if ($table == null) {
             return array('Пользователь не существует');
         }
 
@@ -59,6 +58,7 @@ class DB
             $userData = $this->getUserData()[0];
             $_SESSION['loggedIn'] = true;
             $_SESSION['userId'] = $userData['user_id'];
+            $_SESSION['role'] = $table;
             return array('Успешный вход');
         }
         return array('Неверный пароль');
@@ -82,30 +82,26 @@ class DB
 
     }
 
-    public function logout(): array
+    public function logout(string $table): array
     {
-        $this->request("UPDATE `users` SET `phpsessid` = NULL WHERE `email` = ?", "s", $_SESSION['email']);
+        $this->request("UPDATE `{$table}` SET `phpsessid` = NULL WHERE `email` = ?", "s", $_SESSION['email']);
         $_SESSION = array();
         session_destroy();
         return array('Успешный выход');
     }
 
-    public function getUserData(int $id = null, string $email = null): array
+    public function getUserData(string $table, string $email = null, int $id = null): array
     {
-        if ($id !== null) $userData =
-            $this->request("SELECT `user_id`, `surname`, `name`, `firstname`, `role`, `speciality`, `price` FROM `users` WHERE `user_id` = ?", "i", $id);
-        elseif ($email !== null) $userData =
-            $this->request("SELECT `user_id`, `surname`, `name`, `firstname`, `role`, `speciality`, `price` FROM `users` WHERE `email` = ?", "s", $email);
-        else $userData =
-            $this->request("SELECT `user_id`, `surname`, `name`, `firstname`, `role`, `speciality`, `price` FROM `users` WHERE `email` = ?", "s", $_SESSION['email']);
-        return $userData;
+        $idName = $table == 'doctors' ? 'doc_id' : 'user_id';
+        if ($id) return $this->request("SELECT * FROM `{$table}` WHERE `{$idName}` = ?", "i", $id);
+        return $this->request("SELECT * FROM `{$table}` WHERE `email` = ?", "s", $email);
     }
 
     public function addVisit(int $docId, int $userId, string $dateTime): array
     {
         $docData = $this->getUserData($docId)[0];
         $result = $this->request("SELECT `doc_id` FROM `schedule` WHERE `datetime` = ?;", "s", $dateTime);
-
+        var_dump($result[0]);
         if ($result[0]['doc_id'] === $docId) return array("Занято");
 
         $params = [$dateTime, $docId, $userId, $docData['price']];
@@ -143,7 +139,7 @@ class DB
         $result = [];
         foreach ($table as $value) {
             $params = [$value, $docId];
-            $select = $this->request("SELECT `price` from `schedule` WHERE `datetime` = ? AND `doc_id` = ?", "si", $params)[0];
+            $select = $this->request("SELECT * from `schedule` WHERE `datetime` = ? AND `doc_id` = ?", "si", $params)[0];
             if (!$select) $result[] = $value;
         }
         return $result;

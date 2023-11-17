@@ -27,9 +27,9 @@ class Application
         return $this->user->logout();
     }
 
-    public function getUserData(): array
+    public function getUserData(array $data): array
     {
-        return $this->user->getUserData();
+        return $this->user->getUserData($data);
     }
 
     public function addVisit($data): array

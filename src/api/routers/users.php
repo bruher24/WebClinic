@@ -11,10 +11,10 @@ function route($method, $params, $formData): array
         case 'logout':
             return $app->logout();
         case 'getUserData':
-            return $app->getUserData();
+            return $app->getUserData($params);
         case 'addDocData':
             return $app->addDocData($params);
         default:
-            throw new RoutersException();
+            throw new RoutersException('Неизвестный метод');
     }
 }
