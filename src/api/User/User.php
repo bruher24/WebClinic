@@ -3,6 +3,7 @@
 class User
 {
     private DB $db;
+    private array $roles = ['users', 'doctors'];
 
     public function __construct()
     {
@@ -44,19 +45,22 @@ class User
 
     public function logout(): array
     {
-        if (!$_SESSION['email']) throw new DataException();
+        if (!$_SESSION['email']) throw new DataException('Not logged in user can not logout');
         return $this->db->logout($_SESSION['role']);
     }
 
     public function getUserData(array $data): array
     {
+        $data['role'] = $data['role'] ?? $_SESSION['role'] ?? null;
         if (!$data['email']) throw new DataException("Missing user's email");
-        return $this->db->getUserData($_SESSION['role'], $data['email']);
+        if (!in_array($data['role'], $this->roles)) throw new DataException("Incorrect role." . " Supported roles are: 'users' and 'doctors'.");
+        return $this->db->getUserData($data['role'], $data['email']);
     }
 
-    public function addDocData($data): array
+    public function setDocPrice(array $data): array
     {
-        if ($_SESSION['loggedIn'] && $data['speciality'] && $data['price']) return $this->db->addDocData($data);
+        $price = $data['price'];
+        if ($_SESSION['loggedIn'] && $price) return $this->db->setDocPrice($price);
         throw new DataException();
     }
 }

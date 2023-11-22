@@ -55,7 +55,7 @@ class DB
             $_SESSION['sessId'] = session_id();
             $params = [$_SESSION['sessId'], $_SESSION['email']];
             $this->request("UPDATE `{$table}` SET `phpsessid` = ? WHERE `email` = ?", "ss", $params);
-            $userData = $this->getUserData()[0];
+            $userData = $this->getUserData($table, $data['email'])[0];
             $_SESSION['loggedIn'] = true;
             $_SESSION['userId'] = $userData['user_id'];
             $_SESSION['role'] = $table;
@@ -77,9 +77,10 @@ class DB
         return 'doctors';
     }
 
-    public function addDocData(array $data): array //TODO: сделать
+    public function setDocPrice(int $price): array //TODO: сделать
     {
-
+        if($this->request("UPDATE `doctors` SET `price` = {$price} WHERE `email` = ?", "s", $_SESSION['email'])) return array('Стоимость успешно установлена.');
+        throw new BaseException();
     }
 
     public function logout(string $table): array
@@ -94,7 +95,8 @@ class DB
     {
         $idName = $table == 'doctors' ? 'doc_id' : 'user_id';
         if ($id) return $this->request("SELECT * FROM `{$table}` WHERE `{$idName}` = ?", "i", $id);
-        return $this->request("SELECT * FROM `{$table}` WHERE `email` = ?", "s", $email);
+        if ($email) return $this->request("SELECT * FROM `{$table}` WHERE `email` = ?", "s", $email);
+        throw new DataException('No email or id given');
     }
 
     public function addVisit(int $docId, int $userId, string $dateTime): array

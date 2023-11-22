@@ -52,8 +52,8 @@ class Application
         return $this->schedule->getDocsTable($data);
     }
 
-    public function addDocData($data): array
+    public function setDocPrice(array $data): array
     {
-        return $this->user->addDocData($data);
+        return $this->user->setDocPrice($data);
     }
 }

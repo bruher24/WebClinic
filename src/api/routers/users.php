@@ -12,8 +12,8 @@ function route($method, $params, $formData): array
             return $app->logout();
         case 'getUserData':
             return $app->getUserData($params);
-        case 'addDocData':
-            return $app->addDocData($params);
+        case 'setDocPrice':
+            return $app->setDocPrice($params);
         default:
             throw new RoutersException('Неизвестный метод');
     }
