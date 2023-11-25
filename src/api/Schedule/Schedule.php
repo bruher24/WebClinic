@@ -1,5 +1,8 @@
 <?php
 
+use Cassandra\Date;
+use Couchbase\ValueRecorder;
+
 class Schedule
 {
     private DB $db;
@@ -11,44 +14,57 @@ class Schedule
 
     public function addVisit($data): array
     {
-        if (!$data['docId'] || !$_SESSION['userId'] || !$data['dateTime']) throw new DataException();
-        return $this->db->addVisit($data['docId'], $_SESSION['userId'], $data['dateTime']);
+        if (!$data['docId'] || !$_SESSION['userId'] || !$data['date'] || !$data['time']) throw new DataException();
+        return $this->db->addVisit($data['docId'], $_SESSION['userId'], $data['date'], $data['time']);
     }
 
     public function unsetVisit($data): array
     {
-        if (!$data['dateTime']) throw new DataException();
-        return $this->db->unsetVisit($data['dateTime']);
+        if (!$data['date'] || !$data['time']) throw new DataException();
+        return $this->db->unsetVisit($data['date'], $data['time']);
     }
 
     public function getUserTable(): array
     {
         if (!$_SESSION['userId']) throw new DataException();
-        return $this->db->getUserTable();
+        $idName = 'user_id';
+        if($_SESSION['role'] == 'doctors') $idName = 'doc_id';
+        return $this->db->getUserTable($idName);
     }
 
     public function getDocsTable($data): array
     {
-        if (!$data['day'] || !$data['docId']) throw new DataException();
+        if (!$data['docId']) throw new DataException('No doc_id given');
         date_default_timezone_set('Europe/Samara');
-        $datetime = new DateTime($data['day']);
-        if ($datetime->format('N') == 6 || $datetime->format('N') == 7) return array('Выходной. Записи нет.');
-        $table = $this->timeTable($data['day']);
-
-        return $this->db->getDocsTable($data['docId'], $table);
+        $timeTable = $this->makeTimeTable();
+        return $this->db->getDocsTable($data['docId'], $timeTable);
     }
 
 
-    public function timeTable(string $day): array
+    public function makeTimeTable(): array
     {
-        $time = new \DateTime('09:00');
-        $endOfDay = new \DateTime('17:30');
-        $table = [];
-        while ($time <= $endOfDay) {
-            $table[] = $day . ' ' . $time->format('H:i');
-            $time->add(new \DateInterval('PT30M'));
+        date_default_timezone_set('Europe/Samara');
+        $startTime = time() + 3600;
+        $Date = date('Y-m-d', $startTime);
+        for ($i = 0; $i < 31; $i++) {
+            if (date('w', strtotime($Date)) != 0 && date('w', strtotime($Date)) != 6) {
+                $timeTable[$Date] = '';
+            }
+            $startTime += 3600 * 24;
+            $Date = date('Y-m-d', $startTime);
         }
-        return $table;
+        if(isset($timeTable)) return $timeTable;
+        throw new BaseException();
+    }
+
+    public function toolUsageCount($data): array
+    {
+        return $this->db->toolUsageCount($data['speciality'], $data['doc_id']);
+    }
+
+    public function getToolsUsage(): array
+    {
+        return $this->db->getToolsUsage();
     }
 
 }

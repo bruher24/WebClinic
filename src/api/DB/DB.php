@@ -29,6 +29,30 @@ class DB
         return $this->$name;
     }
 
+    private function request(string $query, string $types = null, $params = null): array
+    {
+        $noResultTypes = ['DELETE', 'UPDATE'];
+        $queryType = mb_substr($query, 0, 6);
+        $stmt = $this->mysqli->prepare($query);
+        if (is_array($params)) $stmt->bind_param($types, ...$params);
+        elseif ($params !== null) $stmt->bind_param($types, $params);
+        if (!$stmt->execute()) return array($stmt->error);
+        $result = $stmt->get_result();
+        if (!$result) {
+            if (mysqli_stmt_errno($stmt) === 000) {
+                if (in_array($queryType, $noResultTypes)) {
+                    return array('ok');
+                }
+            }
+            return array($stmt->error);
+        }
+
+        $answer = [];
+        while ($row = $result->fetch_assoc()) $answer[] = $row;
+        $stmt->close();
+        return $answer;
+    }
+
     public function addUser(array $data, $table, $params): array
     {
         $userCheck = $this->request("SELECT `email` FROM `{$table}` WHERE `email` = ?", "s", $data['email']);
@@ -55,13 +79,21 @@ class DB
             $_SESSION['sessId'] = session_id();
             $params = [$_SESSION['sessId'], $_SESSION['email']];
             $this->request("UPDATE `{$table}` SET `phpsessid` = ? WHERE `email` = ?", "ss", $params);
-            $userData = $this->getUserData($table, $data['email'])[0];
+            $userData = $this->getUserData($table, $data['email']);
             $_SESSION['loggedIn'] = true;
-            $_SESSION['userId'] = $userData['user_id'];
+            $_SESSION['userId'] = $userData['user_id'] ?? $userData['doc_id'];
             $_SESSION['role'] = $table;
             return array('Успешный вход');
         }
         return array('Неверный пароль');
+    }
+
+    public function logout(string $table): array
+    {
+        $this->request("UPDATE `{$table}` SET `phpsessid` = NULL WHERE `email` = ?", "s", $_SESSION['email']);
+        $_SESSION = array();
+        session_destroy();
+        return array('Успешный выход');
     }
 
     public function userExistCheck(array $data): ?string
@@ -77,90 +109,116 @@ class DB
         return 'doctors';
     }
 
-    public function setDocPrice(int $price): array //TODO: сделать
+    public function setDocPrice(int $price): array
     {
-        if($this->request("UPDATE `doctors` SET `price` = {$price} WHERE `email` = ?", "s", $_SESSION['email'])) return array('Стоимость успешно установлена.');
+        if ($this->request("UPDATE `doctors` SET `price` = {$price} WHERE `email` = ?", "s", $_SESSION['email'])) return array('Стоимость успешно установлена.');
         throw new BaseException();
-    }
-
-    public function logout(string $table): array
-    {
-        $this->request("UPDATE `{$table}` SET `phpsessid` = NULL WHERE `email` = ?", "s", $_SESSION['email']);
-        $_SESSION = array();
-        session_destroy();
-        return array('Успешный выход');
     }
 
     public function getUserData(string $table, string $email = null, int $id = null): array
     {
         $idName = $table == 'doctors' ? 'doc_id' : 'user_id';
-        if ($id) return $this->request("SELECT * FROM `{$table}` WHERE `{$idName}` = ?", "i", $id);
-        if ($email) return $this->request("SELECT * FROM `{$table}` WHERE `email` = ?", "s", $email);
+        if ($id) return $this->request("SELECT * FROM `{$table}` WHERE `{$idName}` = ?", "i", $id)[0];
+        if ($email) return $this->request("SELECT * FROM `{$table}` WHERE `email` = ?", "s", $email)[0];
         throw new DataException('No email or id given');
     }
 
-    public function addVisit(int $docId, int $userId, string $dateTime): array
+    public function addVisit(int $docId, int $userId, string $date, string $time): array
     {
-        $docData = $this->getUserData($docId)[0];
-        $result = $this->request("SELECT `doc_id` FROM `schedule` WHERE `datetime` = ?;", "s", $dateTime);
-        var_dump($result[0]);
+        $params = [$date, $time];
+        $docData = $this->getUserData('doctors', null, $docId);
+        $userData = $this->getUserData('users', null, $userId);
+        $result = $this->request("SELECT `doc_id` FROM `schedule` WHERE `date` = ? AND `time` = ?;", "ss", $params);
         if ($result[0]['doc_id'] === $docId) return array("Занято");
 
-        $params = [$dateTime, $docId, $userId, $docData['price']];
-        $this->request("INSERT INTO `schedule`(`datetime`, `doc_id`, `user_id`, `price`) VALUES (?, ?, ?, ?);", "siii", $params);
-        return array("Успешная запись на " . $dateTime);
+        $params = [$date, $time, $docId, $docData['surname'] . " " . $docData['name'] . " " . $docData['firstname'], $docData['speciality'],
+            $userId, $userData['surname'] . " " . $userData['name'] . " " . $userData['firstname'], $docData['price']];
+        $this->request("INSERT INTO `schedule`(`date`, `time`, `doc_id`, `doc_name`, `speciality`, `user_id`, `user_name`, `price`) VALUES (?, ?, ?, ?, ?, ?, ?, ?);", "ssissisi", $params);
+        return array("Успешная запись на {$date} в {$time}.");
     }
 
 
-    public function unsetVisit(string $datetime): array
+    public function unsetVisit(string $date, string $time): array
     {
-        $params = [$datetime, $_SESSION['userId']];
-        $delete = $this->request("DELETE FROM schedule WHERE `datetime` = ? AND `user_id` = ?", "si", $params);
-        if ($delete[0] === 'ok') return array('Запись на ' . $datetime . ' успешно удалена.');
-        return array('Запись на ' . $datetime . ' не найдена.');
+        $params = [$date, $time, $_SESSION['userId']];
+        $checkVisit = $this->request("SELECT * FROM `schedule` WHERE `date` = ? AND `time` = ? AND `user_id` = ?", "ssi", $params)[0];
+        if (!$checkVisit) return array('Запись не найдена');
+        $deleteQuery = $this->request("DELETE FROM `schedule` WHERE `date` = ? AND `time` = ? AND `user_id` = ?", "ssi", $params)[0];
+        if ($deleteQuery == 'ok') return array("Запись на {$date} в {$time} успешно удалена.");
+        throw new BaseException();
     }
 
-    public function getUserTable(): array
+    public function getUserTable(string $idName): array
     {
-        $select = $this->request("SELECT * FROM `schedule` WHERE `user_id` = ?", "i", $_SESSION['userId']);
-        $result = [];
-        foreach ($select as $array) {
-            $table['datetime'] = $array['datetime'];
-            $docData = $this->request("SELECT `surname`, `name`, `firstname`, `speciality` FROM `users` WHERE `user_id` = ?", "i", $array['doc_id'])[0];
-            $table['docName'] = $docData['surname'] . ' ' . $docData['name'] . ' ' . $docData['firstname'];
-            $table['docSpeciality'] = $docData['speciality'];
-            $table['price'] = $array['price'];
-            $result[] = $table;
-        }
-        return $result;
+        return $this->request("SELECT `date`, `time`, `doc_name`, `speciality`, `user_name`, `price` FROM `schedule` WHERE `{$idName}` = ?", "i", $_SESSION['userId']);
     }
 
 
     public function getDocsTable(int $docId, array $table): array
     {
+        $timeTable = [];
+        $dbTimeTable = $this->request("SELECT `time` FROM `timetable`");
+        foreach ($dbTimeTable as $key => $value) {
+            $timeTable[] = $value['time'];
+        }
+        foreach ($table as $key => $value) {
+            $table[$key] = $timeTable;
+        }
+
+        $docDates = $this->request("SELECT `date`, `time` FROM `schedule` WHERE `doc_id` = ?", "i", $docId);
+        foreach ($table as $key => $value) {
+            foreach ($docDates as $item) {
+                if ($item['date'] == $key) {
+                    foreach ($value as $index => $var) {
+                        if ($var == $item['time']) unset($table[$key][$index]);
+                    }
+                }
+            }
+        }
+        return $table;
+    }
+
+    public function getVisits(int $userId, string $idName): array
+    {
+        return $this->request("SELECT `date`, `time`, `doc_name`, `speciality`, `user_name`, `price` FROM `schedule` WHERE `{$idName}` = ?", "i", $userId);
+    }
+
+    public function toolUsageCount(string $speciality, int $docId): array
+    {
         $result = [];
-        foreach ($table as $value) {
-            $params = [$value, $docId];
-            $select = $this->request("SELECT * from `schedule` WHERE `datetime` = ? AND `doc_id` = ?", "si", $params)[0];
-            if (!$select) $result[] = $value;
+        $select = $this->request("SELECT `tools`, `base_tools` FROM `specialities` WHERE `speciality` = ?", "s", $speciality);
+        $tools = explode(', ', $select[0]['tools']);
+        $baseTools = explode(', ', $select[0]['base_tools']);
+        $toolsList = array_merge($tools, $baseTools);
+        $visitsAmount = count($this->getVisits($docId, 'doc_id'));
+        $usageTimeList = $this->request("SELECT * FROM `tools`");
+        foreach ($toolsList as &$item) {
+            foreach ($usageTimeList as $key => $value) {
+                if ($item == $value['tool_name']) $item = [$item => $value['using_time']];
+            }
+        }
+        foreach ($toolsList as $arr) {
+            foreach ($arr as $key => $var) {
+                $visitsTime = $visitsAmount * 30;
+                $usageTime = mb_substr($var, 3, 2);
+                if ($var[0] != '0' || $var[1] != '0') {
+                    $hoursStr = mb_substr($var, 0, 2);
+                    $usageTime = $hoursStr * 60;
+                }
+                $toolsAmount = $visitsTime / $usageTime;
+                $result[$key] = ceil($toolsAmount);
+            }
+        }
+        $docData = $this->getUserData('doctors', null, $docId);
+        foreach($result as $key=>$value) {
+            $params = [$docData['surname'] . " " . $docData['name'] . " " . $docData['firstname'], $docData['speciality'], $key, $value];
+            $insertQuery = $this->request("INSERT INTO `tools_usage`(`doc_name`, `speciality`, `tool_name`, `used_amount`) VALUES (?, ?, ?, ?)", "sssi", $params);
         }
         return $result;
     }
 
-
-    private function request(string $query, string $types = null, $params = null): array
+    public function getToolsUsage(): array
     {
-        $stmt = $this->mysqli->prepare($query);
-        if (is_array($params)) $stmt->bind_param($types, ...$params);
-        elseif ($params !== null) $stmt->bind_param($types, $params);
-        if (!$stmt->execute()) return array($stmt->error);
-        $result = $stmt->get_result();
-        if (!$result) return mysqli_stmt_errno($stmt) === 000 ? array('ok') : $stmt->error;
-        $answer = [];
-        while ($row = $result->fetch_assoc()) $answer[] = $row;
-        $stmt->close();
-        return $answer;
+        return $this->request("SELECT * FROM `tools_usage`");
     }
-
-
 }

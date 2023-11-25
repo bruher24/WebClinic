@@ -48,6 +48,7 @@ $qArr = $urlData[array_key_last($urlData)];
 
 $params = ['method' => $urlData[array_key_first($urlData)]];
 
+
 if (is_array($qArr)) {
     foreach ($qArr as $item) {
         $params[explode('=', $item)[0]] = urldecode(explode('=', $item)[1]);

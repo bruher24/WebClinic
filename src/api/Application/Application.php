@@ -56,4 +56,18 @@ class Application
     {
         return $this->user->setDocPrice($data);
     }
+
+    public function makeTimeTable(): array
+    {
+        return $this->schedule->makeTimeTable();
+    }
+
+    public function toolUsageCount($data): array
+    {
+        return $this->schedule->toolUsageCount($data);
+    }
+    public function getToolsUsage(): array
+    {
+        return $this->db->getToolsUsage();
+    }
 }
