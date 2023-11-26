@@ -32,12 +32,12 @@ class Application
         return $this->user->getUserData($data);
     }
 
-    public function addVisit($data): array
+    public function addVisit(array $data): array
     {
         return $this->schedule->addVisit($data);
     }
 
-    public function unsetVisit($data): array
+    public function unsetVisit(array $data): array
     {
         return $this->schedule->unsetVisit($data);
     }
@@ -47,14 +47,14 @@ class Application
         return $this->schedule->getUserTable();
     }
 
-    public function getDocsTable($data): array
+    public function getDocsTable(array $data): array
     {
         return $this->schedule->getDocsTable($data);
     }
 
-    public function setDocPrice(array $data): array
+    public function setDocData(array $data): array
     {
-        return $this->user->setDocPrice($data);
+        return $this->user->setDocData($data);
     }
 
     public function makeTimeTable(): array
@@ -62,12 +62,13 @@ class Application
         return $this->schedule->makeTimeTable();
     }
 
-    public function toolUsageCount($data): array
+    public function toolUsageCount(array $data): array
     {
         return $this->schedule->toolUsageCount($data);
     }
+
     public function getToolsUsage(): array
     {
-        return $this->db->getToolsUsage();
+        return $this->schedule->getToolsUsage();
     }
 }

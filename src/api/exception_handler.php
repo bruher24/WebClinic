@@ -6,7 +6,7 @@ function exception_handler(Throwable $e)
     $time = date('Y-m-d H:i:s');
     $message = "[{$time}] {$e->getMessage()} in {$e->getFile()} on line {$e->getLine()}\n";
     error_log($message, 3, $_SERVER['DOCUMENT_ROOT'] . '/logs/errors.log');
-    echo $e->getMessage();
+    echo "Упс! Кажется, что-то пошло не так...";
 }
 
 set_exception_handler('exception_handler');

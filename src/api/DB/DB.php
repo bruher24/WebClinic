@@ -31,7 +31,7 @@ class DB
 
     private function request(string $query, string $types = null, $params = null): array
     {
-        $noResultTypes = ['DELETE', 'UPDATE'];
+        $noResultTypes = ['DELETE', 'UPDATE', 'INSERT'];
         $queryType = mb_substr($query, 0, 6);
         $stmt = $this->mysqli->prepare($query);
         if (is_array($params)) $stmt->bind_param($types, ...$params);
@@ -53,7 +53,7 @@ class DB
         return $answer;
     }
 
-    public function addUser(array $data, $table, $params): array
+    public function addUser(array $data, string $table, array $params): array
     {
         $userCheck = $this->request("SELECT `email` FROM `{$table}` WHERE `email` = ?", "s", $data['email']);
         if ($userCheck) return array('Данный email уже зарегистрирован');
@@ -109,10 +109,18 @@ class DB
         return 'doctors';
     }
 
-    public function setDocPrice(int $price): array
+    public function setDocData(int $price = null, string $lunchTime = null): array
     {
-        if ($this->request("UPDATE `doctors` SET `price` = {$price} WHERE `email` = ?", "s", $_SESSION['email'])) return array('Стоимость успешно установлена.');
-        throw new BaseException();
+        if (isset($price)) {
+            if ($this->request("UPDATE `doctors` SET `price` = {$price} WHERE `email` = ?", "s", $_SESSION['email'])) $result[] = ('Стоимость успешно установлена.');
+            else throw new BaseException();
+        }
+        if (isset($lunchTime)) {
+            if ($this->request("UPDATE `doctors` SET `lunch_time` = '{$lunchTime}' WHERE `email` = ?", "s", $_SESSION['email'])) $result[] = ('Обеденное время задано.');
+            else throw new BaseException();
+        }
+        if (isset($result)) return $result;
+        else throw new BaseException();
     }
 
     public function getUserData(string $table, string $email = null, int $id = null): array
@@ -123,18 +131,19 @@ class DB
         throw new DataException('No email or id given');
     }
 
-    public function addVisit(int $docId, int $userId, string $date, string $time): array
+    public function addVisit(int $docId, int $userId, string $date, string $time, array $table): array
     {
-        $params = [$date, $time];
         $docData = $this->getUserData('doctors', null, $docId);
         $userData = $this->getUserData('users', null, $userId);
-        $result = $this->request("SELECT `doc_id` FROM `schedule` WHERE `date` = ? AND `time` = ?;", "ss", $params);
-        if ($result[0]['doc_id'] === $docId) return array("Занято");
-
-        $params = [$date, $time, $docId, $docData['surname'] . " " . $docData['name'] . " " . $docData['firstname'], $docData['speciality'],
-            $userId, $userData['surname'] . " " . $userData['name'] . " " . $userData['firstname'], $docData['price']];
-        $this->request("INSERT INTO `schedule`(`date`, `time`, `doc_id`, `doc_name`, `speciality`, `user_id`, `user_name`, `price`) VALUES (?, ?, ?, ?, ?, ?, ?, ?);", "ssissisi", $params);
-        return array("Успешная запись на {$date} в {$time}.");
+        $docTable = $this->getDocsTable($docId, $table);
+        if (array_key_exists($date, $docTable)) {
+            if (in_array($time . ":00", $docTable[$date])) {
+                $params = [$date, $time, $docId, $docData['surname'] . " " . $docData['name'] . " " . $docData['firstname'], $docData['speciality'],
+                    $userId, $userData['surname'] . " " . $userData['name'] . " " . $userData['firstname'], $docData['price']];
+                $this->request("INSERT INTO `schedule`(`date`, `time`, `doc_id`, `doc_name`, `speciality`, `user_id`, `user_name`, `price`) VALUES (?, ?, ?, ?, ?, ?, ?, ?);", "ssissisi", $params);
+                return array("Успешная запись на {$date} в {$time}.");
+            } else return array("Время занято. Пожалуйста, выберите другое время.");
+        } else return array("Неприемный день. Пожалуйста, выберите другой день.");
     }
 
 
@@ -158,16 +167,27 @@ class DB
     {
         $timeTable = [];
         $dbTimeTable = $this->request("SELECT `time` FROM `timetable`");
+        $lunchTime = $this->request("SELECT `lunch_time` FROM `doctors` WHERE `doc_id` = ?", "i", $docId)[0];
         foreach ($dbTimeTable as $key => $value) {
             $timeTable[] = $value['time'];
         }
+
+        $i = 0;
+        while ($timeTable[$i]) {
+            if ($timeTable[$i] === $lunchTime['lunch_time'] . ':00') {
+                unset($timeTable[$i]);
+                unset($timeTable[$i + 1]);
+            }
+            $i++;
+        }
+
         foreach ($table as $key => $value) {
             $table[$key] = $timeTable;
         }
 
-        $docDates = $this->request("SELECT `date`, `time` FROM `schedule` WHERE `doc_id` = ?", "i", $docId);
+        $docVisits = $this->request("SELECT `date`, `time` FROM `schedule` WHERE `doc_id` = ?", "i", $docId);
         foreach ($table as $key => $value) {
-            foreach ($docDates as $item) {
+            foreach ($docVisits as $item) {
                 if ($item['date'] == $key) {
                     foreach ($value as $index => $var) {
                         if ($var == $item['time']) unset($table[$key][$index]);
@@ -210,7 +230,7 @@ class DB
             }
         }
         $docData = $this->getUserData('doctors', null, $docId);
-        foreach($result as $key=>$value) {
+        foreach ($result as $key => $value) {
             $params = [$docData['surname'] . " " . $docData['name'] . " " . $docData['firstname'], $docData['speciality'], $key, $value];
             $insertQuery = $this->request("INSERT INTO `tools_usage`(`doc_name`, `speciality`, `tool_name`, `used_amount`) VALUES (?, ?, ?, ?)", "sssi", $params);
         }

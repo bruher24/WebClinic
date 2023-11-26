@@ -26,9 +26,9 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/users/register/?surname=Тестов&name=Тест&firstname=Тестович&email=test@test.com&passwordHash=test123&role=patient",
+							"raw": "localhost/users/register/?surname=Иванов&name=Иван&firstname=Иваныч&email=ivan@ivan.com&passwordHash=ivanivan&role=users",
 							"host": [
-								"{{url}}"
+								"localhost"
 							],
 							"path": [
 								"users",
@@ -38,36 +38,31 @@
 							"query": [
 								{
 									"key": "surname",
-									"value": "Тестов"
+									"value": "Иванов"
 								},
 								{
 									"key": "name",
-									"value": "Тест"
+									"value": "Иван"
 								},
 								{
 									"key": "firstname",
-									"value": "Тестович"
+									"value": "Иваныч"
 								},
 								{
 									"key": "email",
-									"value": "test@test.com"
+									"value": "ivan@ivan.com"
 								},
 								{
 									"key": "passwordHash",
-									"value": "test123"
+									"value": "ivanivan"
 								},
 								{
 									"key": "role",
-									"value": "patient"
+									"value": "users"
 								},
 								{
 									"key": "speciality",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "price",
-									"value": "",
+									"value": "Терапевт",
 									"disabled": true
 								}
 							]
@@ -81,7 +76,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/users/login/?email=test@test.com&passwordHash=test123",
+							"raw": "{{url}}/users/login/?email=ivan@ivan.com&passwordHash=ivanivan",
 							"host": [
 								"{{url}}"
 							],
@@ -93,7 +88,36 @@
 							"query": [
 								{
 									"key": "email",
-									"value": "test@test.com"
+									"value": "ivan@ivan.com"
+								},
+								{
+									"key": "passwordHash",
+									"value": "ivanivan"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login doctor",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/users/login/?email=doc2@doc.com&passwordHash=test123",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"login",
+								""
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "doc2@doc.com"
 								},
 								{
 									"key": "passwordHash",
@@ -137,6 +161,18 @@
 								"users",
 								"getUserData",
 								""
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "email@email.com",
+									"disabled": true
+								},
+								{
+									"key": "role",
+									"value": "users",
+									"disabled": true
+								}
 							]
 						}
 					},
@@ -148,7 +184,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/schedule/addVisit/?docId=2&dateTime=2023-09-12 15:00",
+							"raw": "{{url}}/schedule/addVisit/?docId=2&date=2023-11-30&time=15:31",
 							"host": [
 								"{{url}}"
 							],
@@ -163,8 +199,12 @@
 									"value": "2"
 								},
 								{
-									"key": "dateTime",
-									"value": "2023-09-12 15:00"
+									"key": "date",
+									"value": "2023-11-30"
+								},
+								{
+									"key": "time",
+									"value": "15:31"
 								}
 							]
 						}
@@ -177,7 +217,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/schedule/unsetVisit/?dateTime=2023-09-12 15:00",
+							"raw": "{{url}}/schedule/unsetVisit/?date=2023-11-30&time=14:00",
 							"host": [
 								"{{url}}"
 							],
@@ -188,8 +228,12 @@
 							],
 							"query": [
 								{
-									"key": "dateTime",
-									"value": "2023-09-12 15:00"
+									"key": "date",
+									"value": "2023-11-30"
+								},
+								{
+									"key": "time",
+									"value": "14:00"
 								}
 							]
 						}
@@ -210,6 +254,13 @@
 								"schedule",
 								"getUserTable",
 								""
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "2",
+									"disabled": true
+								}
 							]
 						}
 					},
@@ -221,7 +272,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/schedule/getDocsTable/?docId=2&day=2023-09-12",
+							"raw": "{{url}}/schedule/getDocsTable/?docId=2",
 							"host": [
 								"{{url}}"
 							],
@@ -234,10 +285,6 @@
 								{
 									"key": "docId",
 									"value": "2"
-								},
-								{
-									"key": "day",
-									"value": "2023-09-12"
 								}
 							]
 						}
@@ -245,18 +292,58 @@
 					"response": []
 				},
 				{
-					"name": "exceptionTest",
+					"name": "setDocData",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/users/setDocData/?price=300&lunchTime=12:00",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"setDocData",
+								""
+							],
+							"query": [
+								{
+									"key": "price",
+									"value": "300"
+								},
+								{
+									"key": "lunchTime",
+									"value": "12:00"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "toolUsageCount",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/schedule/testMethod",
+							"raw": "{{url}}/schedule/toolUsageCount/?speciality=Терапевт&doc_id=2",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"schedule",
-								"testMethod"
+								"toolUsageCount",
+								""
+							],
+							"query": [
+								{
+									"key": "speciality",
+									"value": "Терапевт"
+								},
+								{
+									"key": "doc_id",
+									"value": "2"
+								}
 							]
 						}
 					},

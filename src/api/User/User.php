@@ -51,16 +51,18 @@ class User
 
     public function getUserData(array $data): array
     {
-        $data['role'] = $data['role'] ?? $_SESSION['role'] ?? null;
-        if (!$data['email']) throw new DataException("Missing user's email");
-        if (!in_array($data['role'], $this->roles)) throw new DataException("Incorrect role." . " Supported roles are: 'users' and 'doctors'.");
-        return $this->db->getUserData($data['role'], $data['email']);
+        if ($data['email'] && $data['role']) {
+            if (!in_array($data['role'], $this->roles)) throw new DataException("Incorrect role." . " Supported roles are: 'users' and 'doctors'.");
+            return $this->db->getUserData($data['role'], $data['email']);
+        } elseif ($_SESSION['loggedIn']) return $this->db->getUserData($_SESSION['role'], $_SESSION['email']);
+        else throw new DataException('No userdata was given');
     }
 
-    public function setDocPrice(array $data): array
+    public function setDocData(array $data): array
     {
         $price = $data['price'];
-        if ($_SESSION['loggedIn'] && $price) return $this->db->setDocPrice($price);
+        $lunchTime = $data['lunchTime']; // обед длится 1 час
+        if ($_SESSION['loggedIn'] && ($price || $lunchTime)) return $this->db->setDocData($price, $lunchTime);
         throw new DataException();
     }
 }

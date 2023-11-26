@@ -1,8 +1,5 @@
 <?php
 
-use Cassandra\Date;
-use Couchbase\ValueRecorder;
-
 class Schedule
 {
     private DB $db;
@@ -12,13 +9,14 @@ class Schedule
         $this->db = new DB;
     }
 
-    public function addVisit($data): array
+    public function addVisit(array $data): array
     {
         if (!$data['docId'] || !$_SESSION['userId'] || !$data['date'] || !$data['time']) throw new DataException();
-        return $this->db->addVisit($data['docId'], $_SESSION['userId'], $data['date'], $data['time']);
+        $timeTable = $this->makeTimeTable();
+        return $this->db->addVisit($data['docId'], $_SESSION['userId'], $data['date'], $data['time'], $timeTable);
     }
 
-    public function unsetVisit($data): array
+    public function unsetVisit(array $data): array
     {
         if (!$data['date'] || !$data['time']) throw new DataException();
         return $this->db->unsetVisit($data['date'], $data['time']);
@@ -28,11 +26,11 @@ class Schedule
     {
         if (!$_SESSION['userId']) throw new DataException();
         $idName = 'user_id';
-        if($_SESSION['role'] == 'doctors') $idName = 'doc_id';
+        if ($_SESSION['role'] == 'doctors') $idName = 'doc_id';
         return $this->db->getUserTable($idName);
     }
 
-    public function getDocsTable($data): array
+    public function getDocsTable(array $data): array
     {
         if (!$data['docId']) throw new DataException('No doc_id given');
         date_default_timezone_set('Europe/Samara');
@@ -53,11 +51,11 @@ class Schedule
             $startTime += 3600 * 24;
             $Date = date('Y-m-d', $startTime);
         }
-        if(isset($timeTable)) return $timeTable;
+        if (isset($timeTable)) return $timeTable;
         throw new BaseException();
     }
 
-    public function toolUsageCount($data): array
+    public function toolUsageCount(array $data): array
     {
         return $this->db->toolUsageCount($data['speciality'], $data['doc_id']);
     }
