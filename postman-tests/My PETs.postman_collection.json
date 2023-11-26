@@ -184,7 +184,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/schedule/addVisit/?docId=2&date=2023-11-30&time=15:31",
+							"raw": "{{url}}/schedule/addVisit/?docId=2&date=2023-11-30&time=16:30",
 							"host": [
 								"{{url}}"
 							],
@@ -204,7 +204,7 @@
 								},
 								{
 									"key": "time",
-									"value": "15:31"
+									"value": "16:30"
 								}
 							]
 						}
@@ -217,7 +217,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/schedule/unsetVisit/?date=2023-11-30&time=14:00",
+							"raw": "{{url}}/schedule/unsetVisit/?date=2023-11-30&time=16:00",
 							"host": [
 								"{{url}}"
 							],
@@ -233,7 +233,7 @@
 								},
 								{
 									"key": "time",
-									"value": "14:00"
+									"value": "16:00"
 								}
 							]
 						}
@@ -297,7 +297,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/users/setDocData/?price=300&lunchTime=12:00",
+							"raw": "{{url}}/users/setDocData/?price=300&lunchTime=12:00&room=123",
 							"host": [
 								"{{url}}"
 							],
@@ -314,6 +314,10 @@
 								{
 									"key": "lunchTime",
 									"value": "12:00"
+								},
+								{
+									"key": "room",
+									"value": "123"
 								}
 							]
 						}
