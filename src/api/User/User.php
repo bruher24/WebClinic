@@ -60,9 +60,8 @@ class User
 
     public function setDocData(array $data): array
     {
-        $price = $data['price'];
-        $lunchTime = $data['lunchTime']; // обед длится 1 час
-        if ($_SESSION['loggedIn'] && ($price || $lunchTime)) return $this->db->setDocData($price, $lunchTime);
+        // обед длится 1 час
+        if ($_SESSION['loggedIn'] && $_SESSION['role'] == 'doctors' && ($data['price'] || $data['lunchTime'] || $data['room'])) return $this->db->setDocData($data['price'], $data['lunchTime'], $data['room']);
         throw new DataException();
     }
 }

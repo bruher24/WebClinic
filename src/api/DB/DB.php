@@ -1,6 +1,5 @@
 <?php
 
-//TODO: изменить все методы под новый концепт
 
 require_once 'connect.php';
 
@@ -58,9 +57,13 @@ class DB
         $userCheck = $this->request("SELECT `email` FROM `{$table}` WHERE `email` = ?", "s", $data['email']);
         if ($userCheck) return array('Данный email уже зарегистрирован');
         if ($table == 'doctors')
-            $result = $this->request("INSERT INTO `{$table}` (`surname`, `name`, `firstname`, `email`, `passwordHash`, `speciality`) VALUES (?, ?, ?, ?, ?, ?)", "ssssss", $params);
+            $result = $this->request(
+                "INSERT INTO `{$table}` (`surname`, `name`, `firstname`, `email`, `passwordHash`, `speciality`) VALUES (?, ?, ?, ?, ?, ?)", "ssssss", $params
+            );
         else
-            $result = $this->request("INSERT INTO `{$table}` (`surname`, `name`, `firstname`, `email`, `passwordHash`) VALUES (?, ?, ?, ?, ?)", "sssss", $params);
+            $result = $this->request(
+                "INSERT INTO `{$table}` (`surname`, `name`, `firstname`, `email`, `passwordHash`) VALUES (?, ?, ?, ?, ?)", "sssss", $params
+            );
         if ($result[0] == 'ok') return array('Успешная регистрация');
         throw new BaseException();
     }
@@ -109,7 +112,7 @@ class DB
         return 'doctors';
     }
 
-    public function setDocData(int $price = null, string $lunchTime = null): array
+    public function setDocData(int $price = null, string $lunchTime = null, string $room = null): array
     {
         if (isset($price)) {
             if ($this->request("UPDATE `doctors` SET `price` = {$price} WHERE `email` = ?", "s", $_SESSION['email'])) $result[] = ('Стоимость успешно установлена.');
@@ -117,6 +120,10 @@ class DB
         }
         if (isset($lunchTime)) {
             if ($this->request("UPDATE `doctors` SET `lunch_time` = '{$lunchTime}' WHERE `email` = ?", "s", $_SESSION['email'])) $result[] = ('Обеденное время задано.');
+            else throw new BaseException();
+        }
+        if (isset($room)) {
+            if ($this->request("UPDATE `doctors` SET `room` = '{$room}' WHERE `email` = ?", "s", $_SESSION['email'])) $result[] = ('Кабинет задан.');
             else throw new BaseException();
         }
         if (isset($result)) return $result;
@@ -138,10 +145,12 @@ class DB
         $docTable = $this->getDocsTable($docId, $table);
         if (array_key_exists($date, $docTable)) {
             if (in_array($time . ":00", $docTable[$date])) {
-                $params = [$date, $time, $docId, $docData['surname'] . " " . $docData['name'] . " " . $docData['firstname'], $docData['speciality'],
+                $params = [$date, $time, $docId, $docData['surname'] . " " . $docData['name'] . " " . $docData['firstname'], $docData['speciality'], $docData['room'],
                     $userId, $userData['surname'] . " " . $userData['name'] . " " . $userData['firstname'], $docData['price']];
-                $this->request("INSERT INTO `schedule`(`date`, `time`, `doc_id`, `doc_name`, `speciality`, `user_id`, `user_name`, `price`) VALUES (?, ?, ?, ?, ?, ?, ?, ?);", "ssissisi", $params);
-                return array("Успешная запись на {$date} в {$time}.");
+                $this->request(
+                    "INSERT INTO `schedule`(`date`, `time`, `doc_id`, `doc_name`, `speciality`, `room`, `user_id`, `user_name`, `price`) 
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);", "ssissiisi", $params);
+                return array("Успешная запись на {$date} в {$time}. Кабинет номер {$docData['room']}.");
             } else return array("Время занято. Пожалуйста, выберите другое время.");
         } else return array("Неприемный день. Пожалуйста, выберите другой день.");
     }

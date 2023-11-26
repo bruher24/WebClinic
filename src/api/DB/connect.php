@@ -17,10 +17,6 @@ if (!$mysqli->query("CREATE TABLE IF NOT EXISTS `users` (
   `phpsessid` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;")) echo $mysqli->error;
 
-
-
-
-
 if (!$mysqli->query("CREATE TABLE IF NOT EXISTS `doctors` (
   `doc_id` int NOT NULL,
   `surname` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -34,10 +30,6 @@ if (!$mysqli->query("CREATE TABLE IF NOT EXISTS `doctors` (
   `phpsessid` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;")) echo $mysqli->error;
 
-
-
-
-
 if (!$mysqli->query("CREATE TABLE IF NOT EXISTS `schedule` (
   `datetime_id` int NOT NULL,
   `date` date NOT NULL,
@@ -50,37 +42,21 @@ if (!$mysqli->query("CREATE TABLE IF NOT EXISTS `schedule` (
   `price` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;")) echo $mysqli->error;
 
-
-
-
-
 if (!$mysqli->query("CREATE TABLE IF NOT EXISTS `specialities` (
   `speciality` varchar(128) NOT NULL,
   `tools` varchar(128) DEFAULT NULL,
   `base_tools` varchar(128) NOT NULL DEFAULT 'Маска, Перчатки'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;")) echo $mysqli->error;
 
-
-
-
-
 if (!$mysqli->query("CREATE TABLE IF NOT EXISTS `timetable` (
   `time_id` int NOT NULL,
   `time` time NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;")) echo $mysqli->error;
 
-
-
-
-
 if (!$mysqli->query("CREATE TABLE IF NOT EXISTS `tools` (
   `tool_name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `using_time` time NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;")) echo $mysqli->error;
-
-
-
-
 
 if (!$mysqli->query("CREATE TABLE IF NOT EXISTS `tools_usage` (
   `doc_id` int NOT NULL,
